@@ -66,8 +66,7 @@ else
 fi
 
 # Update the DNS record
-curl "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$DNS_RECORD_ID" \
-  -X PATCH \
+response=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records/$DNS_RECORD_ID" \
   -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
   -H "Content-Type: application/json" \
   -d "{
@@ -77,4 +76,18 @@ curl "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records
         \"ttl\": $RECORD_TTL,
         \"proxied\": $RECORD_PROXIED,
         \"comment\": \"$RECORD_COMMENT\"
-      }" | jq
+      }")
+# Extract 'success' field
+success=$(echo "$response" | jq -r '.success')
+# Check result
+if [ "$success" == "true" ]; then
+  message="✅ DNS record updated successfully."
+  echo "$message"
+  sh "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
+else
+  message="❌ Failed to update DNS record."
+  echo "$message"
+  echo "🔎 Error response:"
+  echo "$response" | jq
+  sh "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
+fi
