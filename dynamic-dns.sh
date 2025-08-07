@@ -31,6 +31,7 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
+
 # Read arguments
 RECORD_NAME=${1:-}
 RECORD_TYPE=${2:-}
@@ -55,7 +56,7 @@ if [[ -z "${CLOUDFLARE_ZONE_ID:-}" || -z "${CLOUDFLARE_TOKEN:-}" ]]; then
 fi
 
 # Get the DNS record ID
-if DNS_RECORD_ID=$(sh ~/my-setup-scripts/scripts/get-id-by-domain.sh "$RECORD_NAME"); then
+if DNS_RECORD_ID=$(sh ./get-id-by-domain.sh "$RECORD_NAME"); then
   echo "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
 else
   echo "Error: Failed to retrieve DNS record ID for domain: $RECORD_NAME"
