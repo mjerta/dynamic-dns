@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 source ~/.bashrc
+DIR_PATH=$(pwd)
 set -euo pipefail
 
 usage() {
@@ -57,7 +58,7 @@ if [[ -z "${CLOUDFLARE_ZONE_ID:-}" || -z "${CLOUDFLARE_TOKEN:-}" ]]; then
 fi
 
 # Get the DNS record ID
-if DNS_RECORD_ID=$(sh ./get-id-by-domain.sh "$RECORD_NAME"); then
+if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh "$RECORD_NAME"); then
   echo "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
 else
   echo "Error: Failed to retrieve DNS record ID for domain: $RECORD_NAME"
