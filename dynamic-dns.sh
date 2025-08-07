@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 source ~/.bashrc
-DIR_PATH=$(pwd)
+DIR_PATH="$(dirname "$(readlink -f "$0")")"
 set -euo pipefail
 
 usage() {
