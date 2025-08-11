@@ -46,7 +46,7 @@ RECORD_PROXIED=${4:-}
 RECORD_COMMENT=${5:-}
 
 # Get external IP for record content
-RECORD_CONTENT=$(curl -s https://api.ipify.org)
+NEW_RECORD_CONTENT=$(curl -s https://api.ipify.org)
 
 # Validate arguments
 if [[ -z "$RECORD_NAME" || -z "$RECORD_TYPE" || -z "$RECORD_TTL" || -z "$RECORD_PROXIED" || -z "$RECORD_COMMENT" ]]; then
@@ -69,8 +69,16 @@ else
   exit 1
 fi
 
+# Get the DNS record content  
+if DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-id-by-domain.sh "$RECORD_NAME"); then
+  log "Successfully retrieved DNS record ID: $DNS_RECORD_CONTENT"
+else
+  log "Error: Failed to retrieve DNS record ID for domain: $RECORD_NAME"
+  exit 1
+fi
+
 # Check if update is needed
-if [ "$RECORD_CONTENT" == "$DNS_RECORD_ID" ]; then
+if [ "$NEW_RECORD_CONTENT" == "$DNS_RECORD_ID" ]; then
   log "IP address is still the same, no need to update"
   exit 0
 fi
@@ -82,7 +90,7 @@ response=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/$CLOUDFL
   -d "{
         \"type\": \"$RECORD_TYPE\",
         \"name\": \"$RECORD_NAME\",
-        \"content\": \"$RECORD_CONTENT\",
+        \"content\": \"$NEW_RECORD_CONTENT\",
         \"ttl\": $RECORD_TTL,
         \"proxied\": $RECORD_PROXIED,
         \"comment\": \"$RECORD_COMMENT\"
