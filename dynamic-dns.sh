@@ -9,7 +9,7 @@ log() {
 }
 
 usage() {
-  cat << EOF
+  cat <<EOF
 Usage: $0 [RECORD_NAME] [RECORD_TYPE] [TTL] [PROXIED] [COMMENT]
 
 Update a DNS record on Cloudflare via API.
@@ -69,16 +69,18 @@ else
   exit 1
 fi
 
-# Get the DNS record content  
-if DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-id-by-domain.sh "$RECORD_NAME"); then
+# Get the DNS record content
+if DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-record-content-by-domain.sh "$RECORD_NAME"); then
   log "Successfully retrieved DNS record ID: $DNS_RECORD_CONTENT"
 else
   log "Error: Failed to retrieve DNS record ID for domain: $RECORD_NAME"
   exit 1
 fi
 
+log "Current IP: $NEW_RECORD_CONTENT"
+log "Existing DNS Record ID: $DNS_RECORD_CONTENT"
 # Check if update is needed
-if [ "$NEW_RECORD_CONTENT" == "$DNS_RECORD_ID" ]; then
+if [ "$NEW_RECORD_CONTENT" == "$DNS_RECORD_CONTENT" ]; then
   log "IP address is still the same, no need to update"
   exit 0
 fi
