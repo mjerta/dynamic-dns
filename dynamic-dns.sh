@@ -3,6 +3,11 @@ source ~/.bashrc
 DIR_PATH="$(dirname "$(readlink -f "$0")")"
 set -euo pipefail
 
+# Function to log messages with timestamp
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
+
 usage() {
   cat << EOF
 Usage: $0 [RECORD_NAME] [RECORD_TYPE] [TTL] [PROXIED] [COMMENT]
@@ -33,7 +38,6 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
-
 # Read arguments
 RECORD_NAME=${1:-}
 RECORD_TYPE=${2:-}
@@ -46,23 +50,29 @@ RECORD_CONTENT=$(curl -s https://api.ipify.org)
 
 # Validate arguments
 if [[ -z "$RECORD_NAME" || -z "$RECORD_TYPE" || -z "$RECORD_TTL" || -z "$RECORD_PROXIED" || -z "$RECORD_COMMENT" ]]; then
-  echo "Error: Missing required arguments."
+  log "Error: Missing required arguments."
   usage
   exit 1
 fi
 
 # Check required environment variables
 if [[ -z "${CLOUDFLARE_ZONE_ID:-}" || -z "${CLOUDFLARE_TOKEN:-}" ]]; then
-  echo "Error: CLOUDFLARE_ZONE_ID and CLOUDFLARE_TOKEN must be set." >&2
+  log "Error: CLOUDFLARE_ZONE_ID and CLOUDFLARE_TOKEN must be set." >&2
   exit 1
 fi
 
 # Get the DNS record ID
 if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh "$RECORD_NAME"); then
-  echo "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
+  log "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
 else
-  echo "Error: Failed to retrieve DNS record ID for domain: $RECORD_NAME"
+  log "Error: Failed to retrieve DNS record ID for domain: $RECORD_NAME"
   exit 1
+fi
+
+# Check if update is needed
+if [ "$RECORD_CONTENT" == "$DNS_RECORD_ID" ]; then
+  log "IP address is still the same, no need to update"
+  exit 0
 fi
 
 # Update the DNS record
@@ -77,17 +87,19 @@ response=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/$CLOUDFL
         \"proxied\": $RECORD_PROXIED,
         \"comment\": \"$RECORD_COMMENT\"
       }")
+
 # Extract 'success' field
 success=$(echo "$response" | jq -r '.success')
+
 # Check result
 if [ "$success" == "true" ]; then
   message="✅ DNS record updated successfully."
-  echo "$message"
+  log "$message"
   sh "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
 else
   message="❌ Failed to update DNS record."
-  echo "$message"
-  echo "🔎 Error response:"
+  log "$message"
+  log "🔎 Error response:"
   echo "$response" | jq
   sh "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
 fi
