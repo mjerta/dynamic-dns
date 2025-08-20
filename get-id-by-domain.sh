@@ -5,13 +5,26 @@ if [ -z "$1" ]; then
   exit 1
 fi
 DOMAIN="$1"
+ZONE_ID="$2"
+TOKEN="$3"
+
+# Default values if not provided
+DEFAULT_ZONE_ID="$CLOUDFLARE_ZONE_ID"
+DEFAULT_TOKEN="$CLOUDFLARE_TOKEN"
+
+# Use defaults if arguments are missing
+ZONE_ID="${ZONE_ID:-$DEFAULT_ZONE_ID}"
+TOKEN="${TOKEN:-$DEFAULT_TOKEN}"
 
 # Validate required env vars
-if [[ -z "$CLOUDFLARE_ZONE_ID" || -z "$CLOUDFLARE_TOKEN" ]]; then
-  echo "Error: CLOUDFLARE_ZONE_ID and CLOUDFLARE_TOKEN environment variables must be set." >&2
+echo "DOMAIN is $DOMAIN"
+echo "TOKEN is $TOKEN"
+if [[ -z "$ZONE_ID" || -z "$TOKEN" ]]; then
+  echo "Error: ZONE_ID and TOKEN environment variables must be set." >&2
   exit 1
 fi
 
-curl "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
-  -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
+echo 'test'
+curl "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" | jq -r --arg name "$DOMAIN" '.result[] | select(.name == $name) | .id'
