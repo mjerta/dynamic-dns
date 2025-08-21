@@ -40,9 +40,7 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
     exit 1
   fi
   # Get the DNS record ID
-  echo $ZONE_ID
-  echo $TOKEN
-  if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh "$DOMAIN" "$ZONE_ID" "$TOKEN"); then
+  if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh $DOMAIN $ZONE_ID $TOKEN); then
     log "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
     echo 
   else
