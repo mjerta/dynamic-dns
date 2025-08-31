@@ -79,6 +79,7 @@ fi
 
 log "Current IP: $NEW_RECORD_CONTENT"
 log "Existing DNS Record ID: $DNS_RECORD_CONTENT"
+echo "test"
 # Check if update is needed
 if [ "$NEW_RECORD_CONTENT" == "$DNS_RECORD_CONTENT" ]; then
   log "IP address is still the same, no need to update"
