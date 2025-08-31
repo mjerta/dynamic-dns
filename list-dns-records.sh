@@ -18,5 +18,5 @@ fi
 
 curl -s "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  | jq -r --arg name "$DOMAIN" '
+  -H "Content-Type: application/json" |
+  jq
