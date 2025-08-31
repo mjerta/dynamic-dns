@@ -42,7 +42,10 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
   # Get the DNS record ID
   if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh $DOMAIN $ZONE_ID $TOKEN); then
     log "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
-    echo 
+    # TODO succes scenenatio can be drawn out here 
+    # Check existing ip addres and exit if needed
+    # Update the DNS record
+    # If Telegram is setup correctly send the succes/error message
   else
     log "Error: Failed to retrieve DNS record ID for domain: $DOMAIN"
     exit 1
