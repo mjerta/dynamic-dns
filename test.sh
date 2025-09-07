@@ -106,7 +106,7 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
 
     if [[ -z "$TELEGRAM_TOKEN" || -z "$TELEGRAM_CHAT_ID" ]]; then
       echo "Telegram token or telegram chat id missing in the conf"
-      exit 1
+      continue
     fi
 
     # Check result
