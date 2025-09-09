@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 
-if [ -z "$1" ]; then
-  echo "Domain is not provided"
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+  echo "Error: Missing arguments."
+  echo "Usage: $0 <DOMAIN> <ZONE_ID> <TOKEN>"
   exit 1
 fi
+
 DOMAIN="$1"
+ZONE_ID="$2"
+TOKEN="$3"
 
-# Validate required env vars
-if [[ -z "$CLOUDFLARE_ZONE_ID" || -z "$CLOUDFLARE_TOKEN" ]]; then
-  echo "Error: CLOUDFLARE_ZONE_ID and CLOUDFLARE_TOKEN environment variables must be set." >&2
+# Optional: basic domain format check
+if ! [[ "$DOMAIN" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  echo "Error: DOMAIN '$DOMAIN' does not look valid."
   exit 1
 fi
 
-curl "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
-  -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
+curl "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" | jq -r --arg name "$DOMAIN" '.result[] | select(.name == $name) | .content'

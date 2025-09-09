@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 DIR_PATH="$(dirname "$(readlink -f "$0")")"
 CONFIG_FILE="$DIR_PATH/dynamic-dns.conf"
 #
@@ -70,7 +71,8 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
   if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh $DOMAIN $ZONE_ID $TOKEN); then
     log "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
 
-    DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-record-content-by-domain.sh "$DOMAIN")
+    set -x
+    DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-record-content-by-domain.sh $DOMAIN $ZONE_ID $TOKEN)
     if [[ $? -ne 0 || -z "$DNS_RECORD_CONTENT" ]]; then
       log "Error: Failed to retrieve DNS record content for domain: $DOMAIN"
       continue # skip to next domain instead of exiting
@@ -78,6 +80,7 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
       log "Successfully retrieved DNS record content: $DNS_RECORD_CONTENT"
     fi
 
+    set +x
     log "Current IP: $NEW_RECORD_CONTENT"
     log "Existing DNS Record ID: $DNS_RECORD_CONTENT"
     # Check if update is needed
@@ -86,7 +89,6 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
       log "IP address is still the same, no need to update"
       continue
     fi
-
     # Update the DNS record
     response=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records/$DNS_RECORD_ID" \
       -H "Authorization: Bearer $CLOUDFLARE_TOKEN" \
