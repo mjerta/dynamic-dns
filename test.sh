@@ -2,7 +2,7 @@
 
 DIR_PATH="$(dirname "$(readlink -f "$0")")"
 CONFIG_FILE="$DIR_PATH/dynamic-dns.conf"
-#
+
 # Function to log messages with timestamp
 log() {
   echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
@@ -71,7 +71,6 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
   if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh $DOMAIN $ZONE_ID $TOKEN); then
     log "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
 
-    set -x
     DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-record-content-by-domain.sh $DOMAIN $ZONE_ID $TOKEN)
     if [[ $? -ne 0 || -z "$DNS_RECORD_CONTENT" ]]; then
       log "Error: Failed to retrieve DNS record content for domain: $DOMAIN"
@@ -80,7 +79,6 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
       log "Successfully retrieved DNS record content: $DNS_RECORD_CONTENT"
     fi
 
-    set +x
     log "Current IP: $NEW_RECORD_CONTENT"
     log "Existing DNS Record ID: $DNS_RECORD_CONTENT"
     # Check if update is needed
