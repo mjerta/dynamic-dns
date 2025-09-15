@@ -68,10 +68,10 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
     exit 1
   fi
   # Get the DNS record ID
-  if DNS_RECORD_ID=$(sh "$DIR_PATH"/get-id-by-domain.sh $DOMAIN $ZONE_ID $TOKEN); then
+  if DNS_RECORD_ID=$("$DIR_PATH"/get-id-by-domain.sh $DOMAIN $ZONE_ID $TOKEN); then
     log "Successfully retrieved DNS record ID: $DNS_RECORD_ID"
 
-    DNS_RECORD_CONTENT=$(sh "$DIR_PATH"/get-record-content-by-domain.sh $DOMAIN $ZONE_ID $TOKEN)
+    DNS_RECORD_CONTENT=$("$DIR_PATH"/get-record-content-by-domain.sh $DOMAIN $ZONE_ID $TOKEN)
     if [[ $? -ne 0 || -z "$DNS_RECORD_CONTENT" ]]; then
       log "Error: Failed to retrieve DNS record content for domain: $DOMAIN"
       continue # skip to next domain instead of exiting
@@ -114,13 +114,13 @@ for DOMAIN in "${!CLOUDFLARE_DETAILS[@]}"; do
       echo
       message="✅ DNS record updated successfully."
       log "$message"
-      sh "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
+      "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
     else
       message="❌ Failed to update DNS record."
       log "$message"
       log "🔎 Error response:"
       echo "$response" | jq
-      sh "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
+      "$DIR_PATH/send-message-to-telegram-bot.sh" "$message"
     fi
 
   else
