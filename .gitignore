@@ -1,0 +1,4 @@
+# Ignore actual config file to protect secrets
+# Only the example/template should be tracked
+
+dynamic-dns.conf
